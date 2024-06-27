@@ -131,7 +131,7 @@ class GoldenCrossBacktest:
             in_position_array = backtest_result[1]
             unrealised_returns = self.create_unrealised_returns_df(symbol, in_position_array)
 
-            self.show_stats(symbol, unrealised_returns["pnl"], unrealised_returns["comp_pnl"])
+            self.print_stats(symbol, unrealised_returns["pnl"], unrealised_returns["comp_pnl"])
             self.plot_equity_curve(symbol, unrealised_returns["pnl"], unrealised_returns["comp_pnl"])
 
     def plot_equity_curve(self, symbol, returns, comp_returns):
@@ -184,7 +184,7 @@ class GoldenCrossBacktest:
         
         plt.close()
 
-    def show_stats(self, symbol, returns: pd.DataFrame, cum_returns: pd.DataFrame) -> dict:
+    def print_stats(self, symbol, returns: pd.DataFrame, cum_returns: pd.DataFrame) -> dict:
         """
         Computes and displays various trading statistics, such as average trade returns, win rate, PnL, drawdowns,
         and other performance metrics, based on the provided returns.
