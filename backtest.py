@@ -25,6 +25,7 @@ class GoldenCrossBacktest:
         self.since_millis = self.date_to_milliseconds(self.since)
         self.strategy_name = "golden_cross"
         self.fee = 0.0001
+        self.default_figsize = (14, 7)
         self.ohlcv_columns = ["timestamp", "open", "high", "low", "close", "volume"]
         
         
@@ -152,7 +153,7 @@ class GoldenCrossBacktest:
         cum_returns_percentages = comp_returns * 100
         drawdown_percentages = drawdown * 100
         
-        plt.figure(figsize=(14, 7))
+        plt.figure(figsize=self.default_figsize)
 
         # Equity curve
         plt.subplot(2, 1, 1)
