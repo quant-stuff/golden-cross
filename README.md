@@ -1,5 +1,7 @@
 ## Golden Cross - Long-Only
-Buy: Cross over fast moving average (50) and slow moving average (200)
+Example of a simple backtest
+
+Buy: Cross over fast moving average (50) and slow moving average (200)<br>
 Sell: Cross down fast moving average (50) and slow moving average (200)
 
 More info: https://www.investopedia.com/terms/g/goldencross.asp
