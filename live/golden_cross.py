@@ -132,6 +132,7 @@ class GoldenCrossLive:
         self.balance = await self.exchange.fetch_balance()["USDT"]["free"]
 
     async def run(self):
+        await self.init()
         await asyncio.gather(*[self.watch_ohlcv(symbol, self.timeframe) for symbol in self.symbols])
 
         await self.exchange.close()
