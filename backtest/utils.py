@@ -29,5 +29,3 @@ def calculate_DD(returns):
     maxDDD = np.max(drawdown_duration)
     
     return maxDD, maxDDD, avgDD, returns.index[i], drawdown
-
-# 

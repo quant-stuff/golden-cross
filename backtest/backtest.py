@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import ccxt
 
-from utils import calculate_DD
+from backtest.utils import calculate_DD
 
 class GoldenCrossBacktest:
     def __init__(self, exchange_id:str, symbols:list[str], fast_sma_window:int=50, slow_sma_window:int=200,
