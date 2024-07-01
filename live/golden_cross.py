@@ -44,20 +44,20 @@ class GoldenCrossLive:
     async def init(self):
         self.logger.info("Running %s strategy", self.strategy_id)
         self.markets = await self.exchange.load_markets()
-        self.usdt_balance = await self.exchange.fetch_balance()["USDT"]["free"]
+        balance = await self.exchange.fetch_balance()
+        self.usdt_balance = balance["USDT"]["free"]
 
     async def watch_ohlcv(self, symbol:str, timeframe:str):
         self.ohlcvs[symbol] = await self.exchange.fetch_ohlcv(symbol, timeframe, limit=1000)
         while True:
             try:
                 trades = await self.exchange.watch_trades(symbol)
-                # self.exchange.watch_ohlcv -> latency
                 if len(trades) > 0:
                     ohlcvc = self.exchange.build_ohlcvc(trades, timeframe)
                     await self.handle_ohlcv(symbol, ohlcvc)
 
             except ccxt.NetworkError:
-                asyncio.sleep(5)
+                await asyncio.sleep(5)
 
     async def handle_ohlcv(self, symbol:str, ohlcvc:list):
         curr_ohlcv = self.ohlcvs[symbol] # dict -> 200 REST req
@@ -97,7 +97,7 @@ class GoldenCrossLive:
         amount = usdt_amount / curr_price
 
         buy_market_order = await self.exchange.create_order(symbol, "market", "buy", amount)
-        asyncio.sleep(0.1)
+        await asyncio.sleep(0.1)
         entry_trade = await self.exchange.fetch_order(buy_market_order["id"], symbol)
 
         self.open_position["symbol"] = symbol
@@ -111,11 +111,12 @@ class GoldenCrossLive:
         self.logger.info("%s - %s trade opened with an amount of %s %s, at %s", entry_trade["timestamp"],
                          symbol, entry_trade["amount"], base, entry_trade["average"])
 
-        self.balance = await self.exchange.fetch_balance()["USDT"]["free"]
+        balance = await self.exchange.fetch_balance()
+        self.usdt_balance = balance["USDT"]["free"]
 
     async def close_position(self, symbol:str):
-        sell_market_order = await self.exchange.create_order(symbol, "market", "buy", self.open_position["amount"])
-        asyncio.sleep(0.1)
+        sell_market_order = await self.exchange.create_order(symbol, "market", "sell", self.open_position["amount"])
+        await asyncio.sleep(0.1)
         exit_trade = await self.exchange.fetch_order(sell_market_order["id"], symbol)
 
         self.open_position["exit_id"] = exit_trade["id"]
@@ -129,11 +130,15 @@ class GoldenCrossLive:
         self.db.insert(self.open_position) # TODO: replace by an actual DB
         self.open_position = {}
 
-        self.balance = await self.exchange.fetch_balance()["USDT"]["free"]
+        balance = await self.exchange.fetch_balance()
+        self.usdt_balance = balance["USDT"]["free"]
 
     async def run(self):
         await self.init()
-        await asyncio.gather(*[self.watch_ohlcv(symbol, self.timeframe) for symbol in self.symbols])
+        try:
+            await asyncio.gather(*[self.watch_ohlcv(symbol, self.timeframe) for symbol in self.symbols])
+        finally:
+            await self.exchange.close()
 
         await self.exchange.close()
 
